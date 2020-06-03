@@ -32,7 +32,11 @@ func readMessage(c *websocket.Conn) {
 
 func main() {
 	// 这个地址是客户端订阅pushservice的地址
-	c, resp, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:56789/realtime", nil)
+	// wss://futurews.zgnext.com/realtime 测试
+	// wss://futurews.51meeting.com/realtime 线上
+	//c, resp, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:8187/realtime", nil)
+	c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.51meeting.com/realtime", nil)
+	//c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.zgnext.com/realtime", nil)
 	if err != nil {
 		if resp != nil {
 			log.Println("status", resp.StatusCode)
@@ -53,7 +57,12 @@ func main() {
 		readMessage(c)
 	}()
 
-	subkline := `{"rid":"4","req":"Sub","args":["quotation:BTC-USDT", "klines_1m:BTC-USDT", "klines_3m:BTC-USDT"]}`
+	subkline := `{"rid":"4","req":"Sub","args":["index-BTC-USDT", "klines_1m-BTC-USDT", "klines_3m-BTC-USDT", "klines_5m-BTC-USDT",
+               "klines_15m-BTC-USDT", "klines_30m-BTC-USDT", "klines_1h-BTC-USDT", "klines_2h-BTC-USDT", "klines_4h-BTC-USDT", "klines_6h-BTC-USDT",
+               "klines_12h-BTC-USDT", "klines_1d-BTC-USDT", "klines_7d-BTC-USDT", "klines_30d-BTC-USDT"]}`
+
+	//subkline := `{"rid":"4","req":"Sub","args":["index-BTC-USDT"]}`
+
 	//history := `{"req":"GetHistKLine","rid":"103","args":{"Sym":"GMEX_CI_BTC","Typ":"1m","Offset":0,"Sec":1588416631,"Count":1},"expires":"1588848662118"}`
 	//subquotation := `{"rid":"88","req":"Sub","args":["index_GMEX_CI_BTC","__slow__"],"expires":"1588848662293"}`
 	//unsub := `{"rid":"2","req":"UnSub","args":["kline_1m_GMEX_CI_BTC","__slow__"],"expires":"1588848658882"}`
@@ -62,10 +71,3 @@ func main() {
 
 	wg.Wait()
 }
-
-
-
-
-
-
-
