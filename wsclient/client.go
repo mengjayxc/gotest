@@ -28,6 +28,13 @@ func readMessage(c *websocket.Conn) {
 			break
 		}
 		log.Println(string(message))
+		//var klineData types.KlineMessage
+		//err = json.Unmarshal(message, &klineData)
+		//if err != nil {
+		//	fmt.Printf("kline message unmarshall failed: %s\n", err.Error())
+		//}
+
+		//
 	}
 }
 
@@ -47,12 +54,23 @@ func main() {
 	//https://ss.abkjl.com/v1/rest/GetLatestKLine
 	// wss://futurews.zg8.com/realtime （线上）
 	// wss://futurews.51meeting.com/realtime （线上备用）
-	c, resp, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:8187/realtime", nil)
+	// ----------
+
+	// futurews.zg8.com/market
+	// futurews.51meeting.com/market
+
+	//c, resp, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:8188/market", nil)
 	//c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.51meeting.com/realtime", nil)
 	//c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.zg8.com/realtime", nil)
 	//c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.zgnext.com/realtime", nil)
-	//c, resp, err := websocket.DefaultDialer.Dial("wss://api-aws.huobi.pro/ws", nil)
+	//c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.zg4.com/realtime", nil)
 	//c, resp, err := websocket.DefaultDialer.Dial("wss://ss.abkjl.com/v1/market", nil)
+	//c, resp, err := websocket.DefaultDialer.Dial("wss://www.gmex.me/v1/market", nil)
+	// wss://www.gmex.me/v1/market
+	c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.zgnext.com/market", nil)
+	//c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.bbxcloud.com/realtime", nil)
+	//c, resp, err := websocket.DefaultDialer.Dial("wss://futurews.zg8.com/market", nil)
+	//futurews.zg8.com/market
 	if err != nil {
 		if resp != nil {
 			log.Println("status", resp.StatusCode)
@@ -73,13 +91,23 @@ func main() {
 		readMessage(c)
 	}()
 
-	//subkline := `{"rid":"4","req":"Sub","args":["index_BTC", "kline_1m_BTC", "kline_3m_BTC", "kline_5m_BTC",
-	//"kline_15m_BTC", "kline_30m_BTC", "kline_1h_BTC", "kline_2h_BTC", "kline_4h_BTC", "kline_6h_BTC",
-	//"kline_12h_BTC", "kline_1d_BTC", "kline_7d_BTC", "kline_30d_BTC"]}`
+	/* subkline := `{"rid":"4","req":"Sub","args":["index_BTC", "kline_1m_BTC", "kline_3m_BTC", "kline_5m_BTC",
+	"kline_15m_BTC", "kline_30m_BTC", "kline_1h_BTC", "kline_2h_BTC", "kline_4h_BTC", "kline_6h_BTC",
+	"kline_12h_BTC", "kline_1d_BTC", "kline_1w_BTC", "kline_1M_BTC"]}`
+	*/
 
-	//subkline := `{"rid":"4","req":"Sub","args":["kline_1m_BTC", "__slow__"]}`
+	//subkline := `{"rid":"4","req":"Sub","args":["kline_1m_LTC"]}`
 
-	//subquotation := `{"rid":"4","req":"Sub","args":["index_BTC"]}`
+	//subquotation := `{"rid":"4","req":"Sub","args":["index_LTC"]}`
+	subquotation := `{"rid":"4","req":"Sub","args":["index_BTC"]}`
+	//subquotationETH := `{"rid":"4","req":"Sub","args":["index_ETH", "kline_1m_ETH", "kline_3m_ETH"]}`
+
+	// 订阅盖亚 index
+	//tick_TRX/USDT
+	//subquotation := `{"req":"Sub","rid":"20","args":["index_GMEX_CI_BTC"]}`
+	//subquotation := `{"req":"Sub","rid":"20","args":["index_CI_BCH","index_CI_BTC"]}`
+	//subquotation := `{"req":"Sub","rid":"5","args":["tick_BTC.BTC","tick_ETH.ETH","tick_XRP.USDT","tick_BCH.USDT","tick_BTC.USDT","tick_ETC.USDT","tick_XRP.USDT","tick_EOS.USDT","tick_ETH.USDT","tick_BCH.USDT","tick_BTC.UT"],"expires":1599592131951}`
+
 	//subkline := `{"rid":"4","req":"Sub","args":["kline_1m_BTC"]}`
 	//subPosition := `{"rid":"4","req":"Sub","args":["position_TESTUSD"]}`
 	//subPing := `ping`
@@ -87,12 +115,12 @@ func main() {
 
 	// 盖亚的订阅
 	// rid:10 kline_1m
-	subkline := `{"req":"Sub","rid":"20","args":["kline_1w_BTC.USDT"],"expires":1593766170283}`
+	//subkline := `{"req":"Sub","rid":"10","args":["kline_1w_BTC.USDT"],"expires":1593766170283}`
 	//{"req":"Sub","rid":"10","args":["kline_1m_BTC.USDT"],"expires":1593766170283}
 	//subquotation := `{"rid":"88","req":"Sub","args":["index_GMEX_CI_BTC","__slow__"],"expires":"1588848662293"}`
 	//subHbHisKline := `{"req": "market.btcusdt.kline.1min", "id": "id1", "from": 1592792400, "to": 1592792700}`
 
-	//history := `{"req":"GetHistKLine","rid":"103","args":{"Sym":"BTC","Typ":"1w","Offset":0,"Sec":1588416631,"Count":1},"expires":"1588848662118"}`
+	//history := `{"req":"GetHistKLine","rid":"103","args":{"Sym":"BTC","Typ":"1m","Offset":0,"Sec":1588416631,"Count":1},"expires":"1588848662118"}`
 	//history := `{"req":"GetHistKLine","rid":"103","args":{"Sym":"GMEX_CI_BTC","Typ":"1m","Offset":0,"Sec":1588416631,"Count":1},"expires":"1588848662118"}`
 	//subquotation := `{"rid":"88","req":"Sub","args":["index_GMEX_CI_BTC","__slow__"],"expires":"1588848662293"}`
 	//unsubKline := `{"rid":"4","req":"UnSub","args":["kline_1m_BTC"],"expires":"1588848658882"}`
@@ -101,10 +129,12 @@ func main() {
 	//subTime := `{"req":"Time", "rid":"6", "expires": 1593340347000, "args":1593340287707}`
 
 	//{"args":["index_BTC"],"expires":1593602105790,"req":"UnSub","event":"cancel","id":"10048","key":"index","rid":"20","sendTime":0}
+	// 取消订阅
+	//{"rid":"4","req":"UnSub","args":["index_BTC", "kline_1m_BTC"]}
 
 	//writeMessage(c, []byte(history))
-	writeMessage(c, []byte(subkline))
-	//writeMessage(c, []byte(subquotation))
+	//writeMessage(c, []byte(subkline))
+	writeMessage(c, []byte(subquotation))
 	//writeMessage(c, []byte(subPosition))
 	//writeMessage(c, []byte(subTime))
 
