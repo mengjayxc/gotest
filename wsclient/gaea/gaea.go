@@ -58,7 +58,7 @@ func main() {
 	subQuotation := `{"req":"Sub","rid":"11","args":["index_GMEX_CI_ETH"]}`
 
 	// 盖亚的订阅
-	// rid:10 kline_1m
+	// rid:10 klines_1m
 	//subkline := `{"req":"Sub","rid":"10","args":["kline_1w_BTC.USDT"],"expires":1593766170283}`
 
 	//writeMessage(c, []byte(subkline))
