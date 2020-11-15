@@ -1,56 +1,68 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
-func greedWorker(wg *sync.WaitGroup, sharedLock *sync.Mutex, runtime time.Duration) {
-	defer wg.Done()
-
-	var count int
-	for begin := time.Now(); time.Since(begin) <= runtime; {
-		sharedLock.Lock()
-		time.Sleep(3 * time.Nanosecond)
-		sharedLock.Unlock()
-		count++
+func cadenBroad(cadence *sync.Cond) {
+	for range time.Tick(1 * time.Millisecond) {
+		cadence.Broadcast()
 	}
-
-	fmt.Printf("Greedy worker was able to execute %v work loops\n", count)
 }
 
-func politeWorker(wg *sync.WaitGroup, sharedLock *sync.Mutex, runtime time.Duration) {
-	defer wg.Done()
-
-	var count int
-	for begin := time.Now(); time.Since(begin) <= runtime; {
-		sharedLock.Lock()
-		time.Sleep(1 * time.Nanosecond)
-		sharedLock.Unlock()
-
-		sharedLock.Lock()
-		time.Sleep(1 * time.Nanosecond)
-		sharedLock.Unlock()
-
-		sharedLock.Lock()
-		time.Sleep(1 * time.Nanosecond)
-		sharedLock.Unlock()
-
-		count++
-	}
-	fmt.Printf("Polite worker was able to execute %v work loops\n", count)
+func takeStep(cadence *sync.Cond) {
+	cadence.L.Lock()
+	cadence.Wait()
+	cadence.L.Unlock()
 }
 
+func tryDir(dirnName string, dir *int32, out *bytes.Buffer, takeStep func(cond *sync.Cond), cadence *sync.Cond) bool {
+	fmt.Printf("out: %v, %s-111\n", out, dirnName)
+	atomic.AddInt32(dir, 1)
+	takeStep(cadence)
+	if atomic.LoadInt32(dir) == 1 {
+		fmt.Printf("out: %v.Success-222\n", out)
+		return true
+	}
+	takeStep(cadence)
+	atomic.AddInt32(dir, -1)
+	return false
+}
+
+// 活锁问题
 func main() {
-	var wg sync.WaitGroup
-	var sharedLock sync.Mutex
-	var runtime = 1 * time.Second
+	cadence := sync.NewCond(&sync.Mutex{})
+	var left, right int32
+	go cadenBroad(cadence)
+	tryLeft := func(out *bytes.Buffer) bool {
+		return tryDir("left", &left, out, takeStep, cadence)
+	}
 
-	wg.Add(2)
+	tryRight := func(out *bytes.Buffer) bool {
+		return tryDir("right", &right, out, takeStep, cadence)
+	}
 
-	go greedWorker(&wg, &sharedLock, runtime)
-	go politeWorker(&wg, &sharedLock, runtime)
+	walk := func(walking *sync.WaitGroup, name string) {
+		var out bytes.Buffer
+		defer walking.Done()
+		fmt.Fprintf(&out, "%v is trying to scoot-333:\n", name)
+		for i := 0; i < 5; i++ {
+			if tryLeft(&out) || tryRight(&out) {
+				return
+			}
+		}
+		fmt.Fprintf(&out, "\n%v tosses her hands up in exasperation!-444", name)
+	}
 
-	wg.Wait()
+	var peopleInHallWay sync.WaitGroup
+	peopleInHallWay.Add(2)
+
+	go walk(&peopleInHallWay, "Alice")
+	go walk(&peopleInHallWay, "Barbara")
+
+	peopleInHallWay.Wait()
 }
